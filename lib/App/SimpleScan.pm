@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 use 5.006;
 
 use warnings;
@@ -119,9 +119,9 @@ sub transform_test_specs {
                      
     }
     else {
-      my @generated = $item->as_tests;
+      my ($count, @generated) = $item->as_tests;
       $self->tests([@{$self->tests}, @generated]);
-      $self->test_count($self->test_count+(int @generated));
+      $self->test_count($self->test_count+($count));
     }
   }
 }
@@ -286,6 +286,9 @@ sub finalize_tests {
     (
       "use Test::More tests=>" . $self->test_count . ";\n",
       "use Test::WWW::Simple;\n",
+      "use strict;\n",
+      "\n",
+      "my \@accents;\n",
     );
   $self->tests([@tests]);
 }

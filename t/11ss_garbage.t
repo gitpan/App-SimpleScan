@@ -11,6 +11,9 @@ my @output = map {"$_\n"} (split /\n/, ($app->create_tests));
 @expected = map {"$_\n"} split /\n/,<<EOF;
 use Test::More tests=>0;
 use Test::WWW::Simple;
+use strict;
+
+my \@accents;
 # This is a file of garbage.
 # Possible syntax error in this test spec
 # None of this is a valid test.
@@ -29,6 +32,9 @@ $app = new App::SimpleScan;
 @expected = map {"$_\n"} split /\n/,<<EOF;
 use Test::More tests=>1;
 use Test::WWW::Simple;
+use strict;
+
+my \@accents;
 page_like "http://perl.org/",
           qr/perl/,
           "Garbage lines were ignored [http://perl.org/] [/perl/ should match]";

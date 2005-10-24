@@ -1,5 +1,21 @@
 Revision history for App-SimpleScan
 
+0.04  Mon Oct 24 14:42:38 2005
+	- changed 8-bit-character checks; test process seems to nuke
+	  the $1, $2, etc. variables, so I can't check them back in
+	  the tests itself. Now done via an array of matched-out 
+	  characters.
+	- Systematized test counting to make sure counts were right
+	- Tests now "use strict;"
+	- Regex flags handled properly
+	- _regex_render added to centralize regex fixups
+	- Removed duplicate bottm-out test in substitution recursion
+	- Updated tests
+
+0.03  Wed Oct 19 12:22:18 2005
+	- altered test spec parsing to properly handle missing comments
+	- added tests for this code
+
 0.02  Wed Oct 12 13:55:39 2005
 	- Fixed accented character cleanup - wasn't using the
           cleaned-up version of the regex
