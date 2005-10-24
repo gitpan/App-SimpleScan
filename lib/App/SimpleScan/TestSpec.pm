@@ -4,7 +4,7 @@ use Regexp::Common;
 
 use strict;
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 
@@ -203,7 +203,7 @@ sub as_tests {
 
   my %accents = %{$self->accented};
   if (keys %accents) {
-    push @tests, qq[\@accents = (mech->get("$uri")) =~ @{[$self->_render_regex]}\n];
+    push @tests, qq[\@accents = (mech->get("$uri")) =~ @{[$self->_render_regex]};\n];
     $current++;
   }
   if (defined $uri and

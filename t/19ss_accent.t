@@ -7,7 +7,7 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accents;
-\@accents = (mech->get("http://fake.video.fr/q=clips+pour+madonna")) =~ /Recherche de vid(.)os <b>pour/
+\@accents = (mech->get("http://fake.video.fr/q=clips+pour+madonna")) =~ /Recherche de vid(.)os <b>pour/;
 page_like "http://fake.video.fr/q=clips+pour+madonna",
           qr/Recherche de vid(.)os <b>pour/,
           "French video matches [http://fake.video.fr/q=clips+pour+madonna] [/Recherche de vid(.)os <b>pour/ should match]";

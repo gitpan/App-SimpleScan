@@ -1,5 +1,9 @@
 Revision history for App-SimpleScan
 
+0.05  Mon Oct 24 15:55:58 2005
+	- Added a missing semicolon on the generated code for the
+	  accent extraction line. 
+
 0.04  Mon Oct 24 14:42:38 2005
 	- changed 8-bit-character checks; test process seems to nuke
 	  the $1, $2, etc. variables, so I can't check them back in
