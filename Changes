@@ -1,5 +1,8 @@
 Revision history for App-SimpleScan
 
+0.06  Mon Oct 24 16:24:20 2005
+	- fixed "@accents" vs. "$accent[...}" in generated code
+
 0.05  Mon Oct 24 15:55:58 2005
 	- Added a missing semicolon on the generated code for the
 	  accent extraction line. 

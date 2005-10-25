@@ -8,7 +8,7 @@ use Test::More tests=>0;
 use Test::WWW::Simple;
 use strict;
 
-my \@accents;
+my \@accent;
 cache();
 
 EOS
@@ -21,7 +21,7 @@ use Test::More tests=>0;
 use Test::WWW::Simple;
 use strict;
 
-my \@accents;
+my \@accent;
 no_cache();
 
 EOS

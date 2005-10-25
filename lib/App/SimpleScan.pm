@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use 5.006;
 
 use warnings;
@@ -288,7 +288,7 @@ sub finalize_tests {
       "use Test::WWW::Simple;\n",
       "use strict;\n",
       "\n",
-      "my \@accents;\n",
+      "my \@accent;\n",
     );
   $self->tests([@tests]);
 }
