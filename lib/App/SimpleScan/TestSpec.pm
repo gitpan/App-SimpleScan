@@ -4,7 +4,7 @@ use Regexp::Common;
 
 use strict;
 
-our $VERSION = "0.06";
+our $VERSION = "0.07";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 
@@ -157,7 +157,7 @@ sub parse {
   my %accents;
   $regex = $self->regex();
   while (my($accented) = ($regex =~ /([\x80-\xff])/)) {
-    $regex =~ s/[\x80-\xff]/(.)/;
+    $regex =~ s/[\x80-\xff]/(.*?)/;
     $accents{$match_var++} = ord($accented);
   }
   $self->accented(\%accents);
