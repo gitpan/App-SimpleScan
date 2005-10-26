@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 use 5.006;
 
 use warnings;
@@ -126,6 +126,12 @@ sub transform_test_specs {
   }
 }
 
+sub _delete_substitution {
+  my ($self, $pragma_name) = @_;
+  delete $self->{Substitution_data}->{$pragma_name};
+  return;
+}
+
 sub _substitutions {
   my ($self) = @_;
   keys %{$self->{Substitution_data}} 
@@ -138,8 +144,9 @@ sub _substitution_data {
   if (@pragma_values) {
     $self->{Substitution_data}->{$pragma_name} = \@pragma_values;
   }
-  wantarray ? @{$self->{Substitution_data}->{$pragma_name}}
-            : $self->{Substitution_data}->{$pragma_name};
+  return 
+    wantarray ? @{$self->{Substitution_data}->{$pragma_name}}
+              : $self->{Substitution_data}->{$pragma_name};
 }
 
 sub handle_options {
