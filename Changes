@@ -1,5 +1,9 @@
 Revision history for App-SimpleScan
 
+0.11  Wed Oct 26 16:15:52 2005
+	- Temporary fix for TODO test until I can figure out
+	  why I need to do it at the moment.
+
 0.10  Wed Oct 26 15:29:17 2005
 	- Extracted execution of tests into execute() method - 
 	  this will allow plugins to override the simple 'eval'
