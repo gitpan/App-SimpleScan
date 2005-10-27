@@ -1,5 +1,12 @@
 Revision history for App-SimpleScan
 
+0.09  Wed Oct 26 14:48:27 2005
+	- Added --define, --override, --defer, and --debug switches
+	- debug is pretty preliminary, but the methods are there now
+	- can now define substitutions on the command line, and 
+	  choose to have them override or defer to substitutions
+	  in input files
+
 0.08  Wed Oct 26 11:37:45 2005
 	- Added _delete_substitution to support the %%forget pragma.
 

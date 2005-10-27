@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 use 5.006;
 
 use warnings;
@@ -40,8 +40,11 @@ sub new {
   bless $self, $class;
   App::SimpleScan::TestSpec->app($self);
   $self->tests([]);
-  $self->_substitution_data("agent", "Windows IE 6");
   binmode(STDIN);
+
+  $self->handle_options;
+
+  $self->_do_substitution("agent", "Windows IE 6");
 
   return $self;
 }
@@ -52,7 +55,6 @@ sub create_tests {
   $self->test_count(0);
   $self->tests([]);
 
-  $self->handle_options;
   $self->install_pragma_plugins;
   $self->transform_test_specs;
   $self->finalize_tests;
@@ -75,7 +77,7 @@ sub go {
   } 
   else {
     if (${$self->warn}) {
-      warn "# No tests were found in your input file.\n";
+      $self->_stack_test(qq(fail "No tests were found in your input file.\n"));
       $exit_code = 1;
     }
   }
@@ -138,7 +140,7 @@ sub _substitutions {
     if defined $self->{Substitution_data};
 }
 
-sub _substitution_data {
+sub _do_substitution {
   my ($self, $pragma_name, @pragma_values) = @_;
   die "No pragma specified" unless defined $pragma_name;
   if (@pragma_values) {
@@ -149,33 +151,80 @@ sub _substitution_data {
               : $self->{Substitution_data}->{$pragma_name};
 }
 
+sub _substitution_data {
+  my ($self, $pragma_name, @pragma_values) = @_;
+  die "No pragma specified" unless defined $pragma_name;
+
+  if (@pragma_values) {
+    if (${$self->override} and $self->{Predefs}->{$pragma_name}) {
+      $self->_stack_code(qq(diag "Substitution $pragma_name not altered to '@pragma_values'";\n))
+        if ${$self->debug};
+    }
+    else {
+      $self->_do_substitution($pragma_name, @pragma_values);
+    }
+  }
+  else {
+    $self->_do_substitution($pragma_name);
+  }
+  return 
+    wantarray ? @{$self->{Substitution_data}->{$pragma_name}}
+              : $self->{Substitution_data}->{$pragma_name};
+}
+
 sub handle_options {
   my ($self) = @_;
 
   # Variables and setup for basic command-line options.
-  my($generate, $run, $warn);
+  my($generate, $run, $warn, $override, $defer, $debug);
 
   my %basic_options = 
     ('generate' => \$generate,
      'run'      => \$run,
-     'warn'     => \$warn);
+     'warn'     => \$warn,
+     'override' => \$override,
+     'defer'    => \$defer,
+     'debug'    => \$debug,
+    );
 
   # Handle options, including ones from the plugins.
   $self->install_options(%basic_options);
+
+  # The --define option has to be handled slightly differently.
+  # We set things up so that we have a hash of predefined variables
+  # in the object; that way, we can set them up appropriately, and
+  # know whether or not they should be checked for override/defer
+  # when a definition is found in the simple_scan input file.
+  $self->{Options}->{'define=s%'} = ($self->{Predefs} = {});
 
   foreach my $plugin (__PACKAGE__->plugins) {
     $self->install_options($plugin->options)
       if $plugin->can(qw(options));
   }
+
   $self->parse_command_line;
+
+  # If anything was predefined, save it in the substitutions.
+  for my $def (keys %{$self->{Predefs}}) {
+    $self->_do_substitution($def, 
+                            (split /\s+/, $self->{Predefs}->{$def}));
+  }
   $self->app_defaults;
 }
 
 sub app_defaults {
   my ($self) = @_;
-  # Assume run if no flags at all.
-  return if defined ${$self->generate()};
-  $self->run(\1);
+  # Assume --run if neither --run nor --generate.
+  if (!defined ${$self->generate()} and
+      !defined ${$self->run()}) {
+    $self->run(\1);
+  }
+
+  # Assume --defer if neither --defer nor --override.
+  if (!defined ${$self->defer()} and
+      !defined ${$self->override()}) {
+    $self->defer(\1);
+  }
 }
 
 sub install_options {

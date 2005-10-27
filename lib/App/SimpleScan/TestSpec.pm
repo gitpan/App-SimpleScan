@@ -4,7 +4,7 @@ use Regexp::Common;
 
 use strict;
 
-our $VERSION = "0.08";
+our $VERSION = "0.09";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 

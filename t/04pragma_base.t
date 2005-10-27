@@ -6,14 +6,15 @@ BEGIN {
 }
 
 my $app = new App::SimpleScan;
+
 dies_ok { $app->_substitution_data() }  "No pragma name dies as expected";
 
-is_deeply [$app->_substitutions()], ['agent'], "agent automatically there";
 is $app->_substitution_data('Foo'), undef, "doesn't exist";
+ok $app->_substitution_data('agent'), "agent there as expected";
 
 $app->_substitution_data('Foo', 'bar');
 is_deeply $app->_substitution_data('Foo'), 'bar', "Set works";
-is_deeply [sort $app->_substitutions()], [sort qw(Foo agent)], "expected substitutions";
+is_deeply [sort $app->_substitutions()], [qw(Foo agent)], "expected substitutions";
 
 $app->_substitution_data('Foo', 'baz');
 is_deeply $app->_substitution_data('Foo'), 'baz', "update works";
