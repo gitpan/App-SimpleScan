@@ -49,7 +49,7 @@ eq_or_diff [split /\n/, ($spec->as_tests)[1]], [split /\n/, $expected], "N works
 $spec->kind('TY');
 $expected = <<EOS;
 TODO: {
-  local \$TODO = 'Doesn't match now but should later';
+  local \$TODO = "Doesn't match now but should later";
   page_like "http://search.yahoo.com",
             qr/yahoo/s,
             "No comment [http://search.yahoo.com] [/yahoo/s should match]";
@@ -60,7 +60,7 @@ eq_or_diff [split /\n/, ($spec->as_tests)[1]], [split /\n/, $expected], "TY work
 $spec->kind('TN');
 $expected = <<EOS;
 TODO: {
-  local \$TODO = 'Matches now but shouldn't later';
+  local \$TODO = "Matches now but shouldn't later";
   page_unlike "http://search.yahoo.com",
               qr/yahoo/s,
               "No comment [http://search.yahoo.com] [/yahoo/s shouldn't match]";

@@ -1,5 +1,11 @@
 Revision history for App-SimpleScan
 
+0.10  Wed Oct 26 15:29:17 2005
+	- Extracted execution of tests into execute() method - 
+	  this will allow plugins to override the simple 'eval'
+	  with something more interesting
+	- fix a quoting error in TY and TN tests
+
 0.09  Wed Oct 26 14:48:27 2005
 	- Added --define, --override, --defer, and --debug switches
 	- debug is pretty preliminary, but the methods are there now

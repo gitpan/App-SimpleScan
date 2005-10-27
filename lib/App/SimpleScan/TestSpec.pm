@@ -4,7 +4,7 @@ use Regexp::Common;
 
 use strict;
 
-our $VERSION = "0.09";
+our $VERSION = "0.10";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 
@@ -24,7 +24,7 @@ page_unlike "<uri>",
 EOS
     'TY' => <<EOS,
 TODO: {
-  local \$TODO = 'Doesn't match now but should later';
+  local \$TODO = "Doesn't match now but should later";
   page_like "<uri>",
             qr<delim><regex><delim><flags>,
             "<comment> [<uri>] [<delim><regex><delim><flags> should match]";
@@ -32,7 +32,7 @@ TODO: {
 EOS
     'TN' => <<EOS,
 TODO: {
-  local \$TODO = 'Matches now but shouldn't later';
+  local \$TODO = "Matches now but shouldn't later";
   page_unlike "<uri>",
               qr<delim><regex><delim><flags>,
               "<comment> [<uri>] [<delim><regex><delim><flags> shouldn't match]";
