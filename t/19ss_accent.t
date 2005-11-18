@@ -7,11 +7,11 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-\@accent = (mech->get("http://fake.video.fr/q=clips+pour+madonna")) =~ /Recherche de vid(.*?)os <b>pour/;
 page_like "http://fake.video.fr/q=clips+pour+madonna",
-          qr/Recherche de vid(.*?)os <b>pour/,
-          "French video matches [http://fake.video.fr/q=clips+pour+madonna] [/Recherche de vid(.*?)os <b>pour/ should match]";
-is \$accent[0], chr(233), "Accent char 0 as expected";
+          qr/Recherche de vid(.|..)os <b>pour/,
+          "French video matches [http://fake.video.fr/q=clips+pour+madonna] [/Recherche de vid(.|..)os <b>pour/ should match]";
+\@accent = (mech->content =~ /Recherche de vid(.|..)os <b>pour/);
+is \$accent[0], "é", "Accent char 0 as expected";
 EOS
 push @expected,"\n";
 eq_or_diff [@output], [@expected], "got expected output";

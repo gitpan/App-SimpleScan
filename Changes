@@ -1,5 +1,18 @@
 Revision history for App-SimpleScan
 
+0.14  Fri Nov 18 11:59:58 2005
+	- fixed plugin code to only call pragmas() if the plugin
+	  can('pragmas'); allows development of options-only plugins
+
+0.13  Thu Nov 17 17:52:43 2005
+	- added --autocache option: turn on caching at the beginning
+	  of a run
+
+0.12  Tue Nov  8 11:28:14 2005 
+	- More changes for accented characters. Now handles either
+          UTF-8 or Latin-1. 
+	- Eliminated double fetch for accented character tests.
+
 0.11  Wed Oct 26 16:15:52 2005
 	- Temporary fix for TODO test until I can figure out
 	  why I need to do it at the moment.

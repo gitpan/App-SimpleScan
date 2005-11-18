@@ -141,6 +141,12 @@ Currently, the only extra debugging information is a list of variables
 which were I<not> altered by substitution pragmas when C<--override>
 was specified on the command line.
 
+=item C<--autocache>
+
+Turns on caching immediately, whether or not the input file specifies
+C<%%cache> or not. Note that a C<%%nocache> in the input file will 
+turn caching I<off> again. 
+
 =back
 
 =head1 PRAGMAS

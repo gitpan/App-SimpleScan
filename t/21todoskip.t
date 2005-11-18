@@ -6,7 +6,7 @@ my %runs = (
 not ok 1 - later... [http://perl.org/] [/python/ should match] # TODO Doesn't match now but should later
 
 #   Failed (TODO) test 'later... [http://perl.org/] [/python/ should match]'
-#   in /home/y/lib/perl5/site_perl/5.6.1/Test/WWW/Simple.pm at line 65.
+#   in .../Test/WWW/Simple.pm at line ....
 #          got: "\\x{0a}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Tran"...
 #       length: ****
 #     doesn't match '(?-xism:python)'
@@ -28,7 +28,12 @@ EOS
 
 for my $cmd (keys %runs) {
   my @output = qx($cmd);
-  for (@output) { s/length: \d+/length: ****/ }
+  for (@output) { 
+    s/length: \d+/length: ****/; 
+    s|in .*?/Test/WWW/Simple|in .../Test/WWW/Simple|; 
+    s/at line \d+/at line .../;
+  }
+  
   my @expected = map {"$_\n"} (split /\n/, $runs{$cmd});
   eq_or_diff \@output, \@expected, "good output";
 }

@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.11';
+our $VERSION = '0.14';
 use 5.006;
 
 use warnings;
@@ -53,7 +53,6 @@ sub create_tests {
   my ($self) = @_;
 
   $self->test_count(0);
-  $self->tests([]);
 
   $self->install_pragma_plugins;
   $self->transform_test_specs;
@@ -182,14 +181,16 @@ sub handle_options {
 
   # Variables and setup for basic command-line options.
   my($generate, $run, $warn, $override, $defer, $debug);
+  my($cache_from_cmdline);
 
   my %basic_options = 
-    ('generate' => \$generate,
-     'run'      => \$run,
-     'warn'     => \$warn,
-     'override' => \$override,
-     'defer'    => \$defer,
-     'debug'    => \$debug,
+    ('generate'  => \$generate,
+     'run'       => \$run,
+     'warn'      => \$warn,
+     'override'  => \$override,
+     'defer'     => \$defer,
+     'debug'     => \$debug,
+     'autocache' => \$cache_from_cmdline,
     );
 
   # Handle options, including ones from the plugins.
@@ -230,6 +231,10 @@ sub app_defaults {
       !defined ${$self->override()}) {
     $self->defer(\1);
   }
+
+  # if --cache was supplied, turn caching on.
+  $self->_stack_code(qq(cache;\n))
+    if ${$self->autocache};
 }
 
 sub install_options {
@@ -288,8 +293,10 @@ sub install_pragma_plugins {
      else {
        eval "use $plugin";
        $@ and die "Plugin $plugin failed to load: $@\n";
-       foreach my $pragma_spec ($plugin->pragmas) {
-         $self->_pragma(@$pragma_spec);
+       if ($plugin->can('pragmas')) {
+         foreach my $pragma_spec ($plugin->pragmas) {
+           $self->_pragma(@$pragma_spec);
+         }
        }
      }
   }

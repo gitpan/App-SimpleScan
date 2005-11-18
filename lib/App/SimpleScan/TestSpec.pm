@@ -1,10 +1,11 @@
 package App::SimpleScan::TestSpec;
 use base qw(Class::Accessor::Fast);
 use Regexp::Common;
+use bytes;
 
 use strict;
 
-our $VERSION = "0.11";
+our $VERSION = "0.12";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 
@@ -157,8 +158,8 @@ sub parse {
   my %accents;
   $regex = $self->regex();
   while (my($accented) = ($regex =~ /([\x80-\xff])/)) {
-    $regex =~ s/[\x80-\xff]/(.*?)/;
-    $accents{$match_var++} = ord($accented);
+    $regex =~ s/[\x80-\xff]/(.|..)/;
+    $accents{$match_var++} = $accented;
   }
   $self->accented(\%accents);
   $self->regex($regex) if keys %accents;
@@ -202,10 +203,6 @@ sub as_tests {
   my $uri = $self->uri;
 
   my %accents = %{$self->accented};
-  if (keys %accents) {
-    push @tests, qq[\@accent = (mech->get("$uri")) =~ @{[$self->_render_regex]};\n];
-    $current++;
-  }
   if (defined $uri and
       defined (my $regex =   $self->regex) and
       defined (my $delim =   $self->delim) and
@@ -222,15 +219,24 @@ sub as_tests {
        }
        $tests[$current] =~ s/<flags>/$flags/g;
        $tests[$current] =~ s/<comment>/$comment/;
-       for my $accent (keys %accents) {
-         # Keys are which variable we should expect the 
-         # accented character in; values are the expected
-         # character.
-         push @tests, qq[is \$accent[$accent], chr(] . $accents{$accent} .
-                      qq[), "Accent char $accent as expected";\n];
-         $self->test_count($self->test_count()+1);
+       if (keys %accents) {
+         push @tests, qq(\@accent = (mech->content =~ @{[$self->_render_regex]});\n);
+         for my $accent (keys %accents) {
+           # Keys are which variable we should expect the 
+           # accented character in; values are the expected
+           # character.
+           push @tests, qq[is \$accent[$accent], "] . $accents{$accent} .
+                        qq[", "Accent char $accent as expected";\n];
+           $self->test_count($self->test_count()+1);
+         }
        }
     }
+  }
+
+  # Call any plugin per_test routines.
+  for my $plugin ($app->plugins) {
+    $plugin->per_test($self)
+      if $plugin->can('per_test');
   }
 
   # Make any variable substitutions

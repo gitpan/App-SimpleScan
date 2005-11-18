@@ -41,5 +41,8 @@ t/18ss_intl.t
 t/19ss_accent.t
 t/20ss_opts2.t
 t/21todoskip.t
+t/22specplugin.t
+t/23autocache.t
 t/pod-coverage.t
 t/pod.t
+t/App/SimpleScan/Plugin/Tester.pm
