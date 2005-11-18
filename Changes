@@ -1,5 +1,11 @@
 Revision history for App-SimpleScan
 
+0.15  Fri Nov 18 13:39:34 2005
+	- Changed the per_test call in App::SimpleScan::Testspec
+	  to stack the code *after* the generated test. Note that
+	  if a per_test plugin really needs to stack code before
+          generated tests by calling _stack_code.
+
 0.14  Fri Nov 18 11:59:58 2005
 	- fixed plugin code to only call pragmas() if the plugin
 	  can('pragmas'); allows development of options-only plugins

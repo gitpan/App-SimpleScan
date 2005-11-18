@@ -5,7 +5,7 @@ use bytes;
 
 use strict;
 
-our $VERSION = "0.12";
+our $VERSION = "0.15";
 
 __PACKAGE__->mk_accessors(qw(raw uri regex delim kind comment metaquote syntax_error accented flags test_count));
 
@@ -235,8 +235,9 @@ sub as_tests {
 
   # Call any plugin per_test routines.
   for my $plugin ($app->plugins) {
-    $plugin->per_test($self)
-      if $plugin->can('per_test');
+    push @tests, 
+      $plugin->per_test($self)
+        if $plugin->can('per_test');
   }
 
   # Make any variable substitutions
