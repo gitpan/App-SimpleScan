@@ -1,6 +1,6 @@
 package App::SimpleScan;
 
-our $VERSION = '0.15';
+our $VERSION = '0.17';
 use 5.006;
 
 use warnings;
@@ -38,6 +38,8 @@ sub new {
   my $self = {};
   $self->{Substitution_data}= {};
   bless $self, $class;
+  $self->_load_plugins();
+
   App::SimpleScan::TestSpec->app($self);
   $self->tests([]);
   binmode(STDIN);
@@ -81,7 +83,7 @@ sub go {
   } 
   else {
     if (${$self->warn}) {
-      $self->_stack_test(qq(fail "No tests were found in your input file.\n"));
+      $self->stack_test(qq(fail "No tests were found in your input file.\n"));
       $exit_code = 1;
     }
   }
@@ -161,7 +163,7 @@ sub _substitution_data {
 
   if (@pragma_values) {
     if (${$self->override} and $self->{Predefs}->{$pragma_name}) {
-      $self->_stack_code(qq(diag "Substitution $pragma_name not altered to '@pragma_values'";\n))
+      $self->stack_code(qq(diag "Substitution $pragma_name not altered to '@pragma_values'";\n))
         if ${$self->debug};
     }
     else {
@@ -205,10 +207,15 @@ sub handle_options {
 
   foreach my $plugin (__PACKAGE__->plugins) {
     $self->install_options($plugin->options)
-      if $plugin->can(qw(options));
+      if $plugin->can('options');
   }
 
   $self->parse_command_line;
+
+  foreach my $plugin (__PACKAGE__->plugins) {
+    $plugin->validate_options() if
+      $plugin->can('validate_options');
+  }
 
   # If anything was predefined, save it in the substitutions.
   for my $def (keys %{$self->{Predefs}}) {
@@ -233,7 +240,7 @@ sub app_defaults {
   }
 
   # if --cache was supplied, turn caching on.
-  $self->_stack_code(qq(cache;\n))
+  $self->stack_code(qq(cache;\n))
     if ${$self->autocache};
 }
 
@@ -277,6 +284,13 @@ sub install_options {
   }
 }
 
+sub _load_plugins {
+  my($self) = @_;
+  foreach my $plugin (__PACKAGE__->plugins) {
+    eval "use $plugin";
+    $@ and die "Plugin $plugin failed to load: $@\n";
+}
+
 sub parse_command_line {
   my ($self) = @_;
   GetOptions(%{$self->{Options}});
@@ -287,18 +301,15 @@ sub install_pragma_plugins {
 
   foreach my $plugin (@local_pragma_support, 
                       __PACKAGE__->plugins) {
-     if (ref $plugin eq 'ARRAY') {
-       $self->_pragma(@$plugin);
-     }
-     else {
-       eval "use $plugin";
-       $@ and die "Plugin $plugin failed to load: $@\n";
-       if ($plugin->can('pragmas')) {
-         foreach my $pragma_spec ($plugin->pragmas) {
-           $self->_pragma(@$pragma_spec);
-         }
-       }
-     }
+    if (ref $plugin eq 'ARRAY') {
+      $self->_pragma(@$plugin);
+    }
+    elsif ($plugin->can('pragmas')) {
+        foreach my $pragma_spec ($plugin->pragmas) {
+          $self->_pragma(@$pragma_spec);
+        }
+      }
+    }
   }
 }
 
@@ -318,30 +329,34 @@ sub _do_agent {
   $maybe_agent = reverse $maybe_agent; 
   $self->_substitution_data("agent", $maybe_agent)
     if grep { $_ eq $maybe_agent } $reference_mech->known_agent_aliases;
-  $self->_stack_code(qq(user_agent("$maybe_agent");\n));
+  $self->stack_code(qq(user_agent("$maybe_agent");\n));
 }
 
 sub _do_cache {
   my ($self,$rest) = @_;
-  $self->_stack_code("cache();\n");
+  $self->stack_code("cache();\n");
 }
 
 sub _do_nocache {
   my ($self,$rest) = @_;
-  $self->_stack_code("no_cache();\n");
+  $self->stack_code("no_cache();\n");
 }
 
-sub _stack_code {
+sub stack_code {
   my ($self, @code) = @_;
   my @old_code = @{$self->tests};
   $self->tests([@old_code, @code]);
 }
 
-sub _stack_test {
+*__PACKAGE__::_stack_code = \&stack_code;
+
+sub stack_test {
   my($self, @code) = @_;
-  $self->_stack_code(@code);
+  $self->stack_code(@code);
   $self->test_count($self->test_count()+1);
 }
+
+*__PACKAGE__::_stack_test = \&stack_test;
 
 sub finalize_tests {
   my ($self) = @_;
@@ -443,6 +458,14 @@ C<agent>) and any supplied by the plugins.
 =head2 transform_test_specs
 
 Does all the work of transforming test specs into code.
+
+=head2 stack_code
+
+Adds code to the final output without incrementing the number of tests.
+
+=head2 stack_test
+
+Adds code to the final output and bumps the test count by one.
 
 =head2 finalize_tests
 

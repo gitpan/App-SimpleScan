@@ -1,5 +1,17 @@
 Revision history for App-SimpleScan
 
+0.17  Fri Nov 18 18:10:34 2005
+	- Added conditional callback to validate_options()
+	  in plugins; allows plugins to make sure that 
+	  command-line option values are indeed valid.
+
+0.16  Fri Nov 18 17:29:12 2005
+	- Moved plugin loading into separate private method
+	- made stack_tests and stack_code public methods
+	  since they were being used publically anyway
+	- aliased to _stack_code and _stack_tests until all
+	  plugins have time to catch up
+
 0.15  Fri Nov 18 13:39:34 2005
 	- Changed the per_test call in App::SimpleScan::Testspec
 	  to stack the code *after* the generated test. Note that
