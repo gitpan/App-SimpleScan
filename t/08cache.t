@@ -9,7 +9,6 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-mech->agent_alias('Windows IE 6');
 cache();
 
 EOS
@@ -23,7 +22,6 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-mech->agent_alias('Windows IE 6');
 no_cache();
 
 EOS

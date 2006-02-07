@@ -7,7 +7,6 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-mech->agent_alias('Windows IE 6');
 page_like "http://fake.video.fr/q=clips+pour+madonna",
           qr/Recherche de vid(.|..)os <b>pour/,
           qq(French video matches [http://fake.video.fr/q=clips+pour+madonna] [/Recherche de vid(.|..)os <b>pour/ should match]);

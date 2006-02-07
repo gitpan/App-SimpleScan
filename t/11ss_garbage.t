@@ -11,7 +11,6 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-mech->agent_alias('Windows IE 6');
 # This is a file of garbage.
 # Possible syntax error in this test spec
 # None of this is a valid test.
@@ -34,7 +33,6 @@ use Test::WWW::Simple;
 use strict;
 
 my \@accent;
-mech->agent_alias('Windows IE 6');
 page_like "http://perl.org/",
           qr/perl/,
           qq(Garbage lines were ignored [http://perl.org/] [/perl/ should match]);
