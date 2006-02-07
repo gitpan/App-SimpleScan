@@ -14,6 +14,13 @@ sub import {
   *{caller() . '::test_expand'}  = \&test_expand;
 }
 
+sub init {
+  my ($class, $app) = @_;
+  no strict 'refs';
+  *{caller() . '::expander'} = \&test_expand;
+  $app->{Expander} = "ping!";
+}
+
 sub test_expand {
   my($self, $value) = @_;
   $test_expand = $value if defined $value;
@@ -45,7 +52,7 @@ sub test_expand_pragma {
 sub per_test {
   my($class, $testspec) = @_;
   return unless $testspec->app->test_expand;
-  return qq(# per-test comment\n);
+  return 0, qq(# per-test comment\n);
 }
 
 1; # Magic true value required at end of module
