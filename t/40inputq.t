@@ -22,6 +22,7 @@ use Test::More tests=>1;
 use Test::WWW::Simple;
 use strict;
 
+use Test::Demo;
 mech->agent_alias('Windows IE 6');
 # next line plugin called 1 time
 page_like "http://yahoo.com",

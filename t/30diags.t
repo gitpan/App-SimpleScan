@@ -14,6 +14,6 @@ F 7 Deliberately broken test (asia) [http://asia.search.yahoo.com/search/news?p=
 T 9 unexpected success (asia) [http://asia.search.yahoo.com/search/news?p=bush&ei=UTF-8&fr=sfp&fl=0&x=wrt&debug=qa] [/yahoo/ should match]
 EOS
 
-$got = `bin/simple_report -v -v <t/noplan.tap`;
+$got = `$^X $ENV{HARNESS_PERL_SWITCHES} bin/simple_report -v -v <t/noplan.tap`;
 eq_or_diff $got, $expected, "extended output as planned";
 

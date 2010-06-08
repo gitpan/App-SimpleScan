@@ -9,8 +9,8 @@ $ENV{HARNESS_PERL_SWITCHES} = "" unless defined $ENV{HARNESS_PERL_SWITCHES};
 1..4
 ok 1 - perl.org [http://perl.org] [/perl/i should match]
 ok 2 - python.org [http://python.org] [/python/i should match]
-ok 3 - java.org [http://java.org] [/java/i should match]
-ok 4 - ruby.org [http://ruby.org] [/ruby/i should match]
+ok 3 - ruby.org [http://ruby.org] [/ruby/i should match]
+ok 4 - erlang.org [http://erlang.org] [/erlang/i should match]
 EOF
 eq_or_diff(\@output, \@expected, "working output as expected");
 

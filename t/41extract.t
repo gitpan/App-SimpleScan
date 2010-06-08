@@ -21,10 +21,9 @@ my %tests = (
   [ 'Master Librarian', 'Mailing Lists', 'Perl modules', 'Perl scripts'],
 );
 
-plan tests => int keys %tests;
-
 while ( my($test_input, $expected) = each %tests) {
   my @got = $app->expand_backticked($test_input);
   is_deeply \@got, $expected, "output for '$test_input'";
 }
 
+done_testing(1 + int keys %tests);

@@ -3,20 +3,11 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use Test::Harness;
-use Test::Harness::Iterator;
+use TAP::Parser;
 
-our $VERSION = "1.02";
+our $VERSION = "2.00";
 $|++;
 
-# This is an example of how to write your own harness using 
-# Test::Harness::Straps.  It duplicates most of the features of 
-# Test::Harness.
-#
-# It uses an undocumented, experimental
-# callback interface.  If you like it, don't like it, would like
-# to see it become non-experimental, etc... discuss on perl-qa@perl.org
-#
 #  simple_report NAME <tap.output
 
 my($verbose, $status);
@@ -24,98 +15,133 @@ GetOptions("verbose+" => \$verbose,
            "status"   => \$status);
 
 my $test_name = shift || "UNNAMED_TEST";
-
-my $iterator = Test::Harness::Iterator->new(\*STDIN);
-my $strap = Test::Harness::Straps->new;
-
-$strap->_reset_file_state;
-$strap->{file} = "STDIN";
+my $parser = TAP::Parser->new( { source => \*STDIN } );
 
 my %totals  = (
-                max      => 0,
-                seen     => 0,
+                max       => undef,
+                seen      => 0,
 
-                ok       => 0,
-                todo     => 0,
-                skip     => 0,
-                bonus    => 0,
+                ok        => 0,
+                todo      => 0,
+                skip      => 0,
+                bonus     => 0,
+                unplanned => 0, 
 
-                details  => []
+                details   => {}
                );
 
 my $current_test_count = 0;
 my $unplanned = 0;
 my $sharp = "# ";
-
-# Store the counts into the Straps object
-# so callbacks can find them.
-$strap->{totals}{STDIN}         = \%totals;
+my $last_item;
 
 # Read and analyze input.
-while( defined(my $line = $iterator->next) ) {
-    $strap->_analyze_line($line, \%totals);
-    if ($status) {
-      if ($totals{seen} > $current_test_count) {
-        $current_test_count++;
-        if ($totals{max} == 0) {
-          $unplanned = 1;
+TAP_LINE:
+  while( defined(my $item = $parser->next) ) {
+
+      # If this is a "Bail out!" just quit.
+      last if $item->is_bailout;
+
+      # Comments are assumed to "belong" to the last test seen.
+      if ($item->is_comment) {
+          next TAP_LINE if $item->as_string =~ /\A# Looks like /;
+          push @{ $totals{details}->{$current_test_count}->{lines} }, $item->as_string;
+          next TAP_LINE;
+      }
+
+      # Record the predicted max test number if this is a plan line.
+      # If this is a skip_all, then quit.
+      if ($item->is_plan and not defined $totals{plan}) {
+          last TAP_LINE if $item->has_skip;
+          # First test plan seen.
+          $totals{max} = $item->tests_planned;
+          next TAP_LINE;
+      }
+
+      # Should be a test; bump the test count by 1 if so.
+      if ($item->is_test) {
+          $current_test_count++, $totals{seen}++;
+          $totals{details}->{$current_test_count}->{item} = $item;
+      }
+
+      if ($item->is_actual_ok) {
+          $totals{ok}++;
+      }
+      if ($item->has_todo) {
+          $totals{todo}++;
+          $totals{ok}++, $totals{bonus}++ if $item->todo_passed;
+      }
+      $totals{skip}++  if $item->has_skip;
+
+      if ($status and not defined $totals{max} ) {
+          $unplanned++;
           print "$sharp.";
           $sharp = '';
-        }
-        else {
-          printf STDERR "$sharp %2.1d%% complete\n", ($totals{seen}*1.0/$totals{max})*100;
-        }
       }
-    }
-    last if $strap->{saw_bailout};
-}
+      elsif ($status) {
+          printf STDERR "$sharp %2.1d%% complete\n", ($totals{seen}*1.0/$totals{max})*100;
+      }
+  }
 print "\n" if $unplanned;
 
 
 # Print summary
-print "$test_name: tests=$totals{seen}, ok=$totals{ok}, failed=@{[$totals{seen}-$totals{ok}]}, skipped=$totals{skip}, todo=$totals{todo}";
-print (($totals{bonus} ? " ($totals{bonus} UNEXPECTEDLY SUCCEEDED)" : ""), "\n");
+print "$test_name: tests=$totals{seen}, ",
+                  "ok=$totals{ok}, ",
+                  "failed=@{[$totals{seen}-$totals{ok}]}, ",
+                  "skipped=$totals{skip}, ",
+                  "todo=$totals{todo}";
+print $totals{bonus} 
+        ? " ($totals{bonus} UNEXPECTEDLY SUCCEEDED)" 
+        : "";
+print $totals{unplanned}
+        ? " ($totals{unplanned} UNPLANNED)"
+        : "";
+print "\n";
+
 if ($status) {
    print STDERR "$sharp $test_name: tests=$totals{seen}, ok=$totals{ok}, failed=@{[$totals{seen}-$totals{ok}]}, skipped=$totals{skip}, todo=$totals{todo}";
-   print STDERR (($totals{bonus} ? " ($totals{bonus} UNEXPECTEDLY SUCCEEDED)" : ""),"\n");
+   print STDERR $totals{bonus} ? " ($totals{bonus} UNEXPECTEDLY SUCCEEDED)" : "";
+   print STDERR $totals{unplanned} ? " ($totals{unplanned} UNPLANNED)" : "";
+   print STDERR "\n";
+   
 }
 
 # Print details if requested
 if ($verbose) {
-  my $test_num = 0;
-  for my $test_detail (@{$totals{details}}) {
-    $test_num++;
+  for my $test_number (sort keys %{ $totals{details} }) {
+        my $item = $totals{details}->{$test_number}->{item};
+        my $lines = $totals{details}->{$test_number}->{lines};
+        (my $description = $item->description) =~ s/\A-\s+//;
 
-    if ($test_detail->{type} eq 'todo') {
-      if ($test_detail->{actual_ok}) {
-        print "T $test_num $test_detail->{name}\n";
-        snapshot($test_detail);
-      }
+        if ($item->has_todo and $item->todo_passed) {
+            printf "T %d %s\n",$test_number, $description;
+            verbose_details($lines);
+        }
+        elsif (not $item->is_ok and not $item->has_todo) {
+            printf "F %d %s\n", $test_number, $description;
+            verbose_details($lines);
+        }
     }
-    next if $test_detail->{'ok'};
-    print "F $test_num $test_detail->{name}\n";
+}
 
+sub verbose_details {
+    my $lines = shift;
     # Print detailed details (diags) if requested
     if ($verbose > 1) {
-      # All diags will be there, including snapshot
-      my $diags =  "# ".$test_detail->{diagnostics};
-      chomp $diags;
-      $diags =~ s/\n/\n# /g;
-      print "$diags\n";
+        # Super-verbose - all diags will be there, including snapshot
+        print  map {"$_\n"} @$lines;
     }
     else {
-      # Verbose report - snapshots only (if any)
-      snapshot($test_detail);
+        # Plain verbose - snapshots only (if any)
+        snapshot($lines);
     }
-  }
 }
 
 sub snapshot {
-  my ($test_detail) = shift;
-  return if !$test_detail->{diagnostics};
+  my($lines) = shift;
+  print map { "$_\n" } grep { /^(See snapshot.*\z)/sm } @{ $lines };
 
-  my($snapshot) = ($test_detail->{diagnostics} =~ /^(See snapshot.*\z)/sm);
-  print ("# ",$snapshot) if $snapshot;
 }
 
 __END__

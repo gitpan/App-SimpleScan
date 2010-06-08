@@ -10,6 +10,7 @@ use Test::More tests=>4;
 use Test::WWW::Simple;
 use strict;
 
+use Test::Demo;
 mech->agent_alias('Windows IE 6');
 page_like "http://au.yahoo.com/",
           qr/yahoo/,
@@ -34,6 +35,7 @@ use Test::More tests=>4;
 use Test::WWW::Simple;
 use strict;
 
+use Test::Demo;
 # Adding test expansion comment
 mech->agent_alias('Windows IE 6');
 page_like "http://au.yahoo.com/",

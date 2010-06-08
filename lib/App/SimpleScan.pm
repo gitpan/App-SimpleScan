@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use English qw(-no_match_vars);
 
-our $VERSION = '2.02';
+our $VERSION = '3.00';
 
 use Carp;
 use Getopt::Long;

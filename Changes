@@ -1,4 +1,14 @@
 Revision history for App-SimpleScan
+3.00  Mon Jun  7 18:13:41 PDT 2010
+	- Completely revamped simple_report to us TAP::Harness
+	  instead of Test::Harness. Output is the same, but now
+	  we're using a much better TAP parsing engine.
+	- Cleaned up test dependent on external sites that 
+	  had changed their HTML, moved it to xt/
+        - Various minor changes to support temp plugin used in tests
+	- No actual changes to App::SimpleScan, but it's the module
+	  we get our version from.
+
 2.02  Thu Sep 28 13:25:20 PDT 2006
 	- longstanding bug with quoted strings containing backslashes
 	  finally detected in the field and fixed. Strings like 

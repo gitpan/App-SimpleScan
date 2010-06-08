@@ -55,7 +55,6 @@ t/17ss_works.t
 t/18ss_intl.t
 t/19ss_accent.t
 t/20ss_opts2.t
-t/21todoskip.t
 t/22specplugin.t
 t/23autocache.t
 t/24per_test.t
@@ -91,3 +90,6 @@ t/planned.tap
 t/pod-coverage.t
 t/pod.t
 t/snap.tap
+t/App/SimpleScan/Plugin/Tester.pm
+xt/21todoskip.t
+

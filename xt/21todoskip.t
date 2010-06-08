@@ -9,7 +9,7 @@ not ok 1 - later... [http://perl.org/] [/python/ should match] # TODO Doesn't ma
 
 #   Failed (TODO) test 'later... [http://perl.org/] [/python/ should match]'
 #   in .../Test/WWW/Simple.pm at line ....
-#          got: "\\x{0a}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Tran"...
+#          got: "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Trans"...
 #       length: ****
 #     doesn't match '(?-xism:python)'
 
@@ -32,8 +32,8 @@ for my $cmd (keys %runs) {
   my @output = qx($cmd);
   for (@output) { 
     s/length: \d+/length: ****/; 
-    s|in .*?/Test/WWW/Simple|in .../Test/WWW/Simple|; 
-    s/at line \d+/at line .../;
+    s{(in|at) .*?/Test/WWW/Simple}{in .../Test/WWW/Simple}; 
+    s/(at )?line \d+/at line .../;
   }
   
   my @expected = map {"$_\n"} (split /\n/, $runs{$cmd});
