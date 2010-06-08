@@ -1,4 +1,7 @@
 Revision history for App-SimpleScan
+3.01  Tue Jun  8 14:49:48 PDT 2010
+	- Revamped cookbook to make it much more useful.
+
 3.00  Mon Jun  7 18:13:41 PDT 2010
 	- Completely revamped simple_report to us TAP::Harness
 	  instead of Test::Harness. Output is the same, but now
